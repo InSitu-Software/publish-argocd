@@ -23,7 +23,7 @@ on:
       argocd_applicationset:
         description: Is the target of update an ArgoCD ApplicationSet
         default: true
-        type: bool
+        type: boolean
       argocd_applicationset_generator:
         description: The generator of the ArgoCD Applications
         default: list
