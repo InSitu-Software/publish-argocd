@@ -1,0 +1,87 @@
+name: trigger-publish
+
+on:
+  workflow_call:
+    inputs:
+      docker_tag:
+        description: The Docker-Tag to be deployed
+        required: true
+        type: string
+      apps_repo_sub_folder:
+        description: The subfolder inside of the ArgoCD Application Repository
+        required: true
+        type: string
+      apps_repo_file_name:
+        description: The filename of the ApplicationSet
+        required: true
+        type: string
+      apps_repo_event:
+        description: GitHub Action Dispatch EventType to be triggered in ArgoCD Apps Repo
+        required: true
+        default: update_app
+        type: string
+      argocd_applicationset:
+        description: Is the target of update an ArgoCD ApplicationSet
+        default: true
+        type: bool
+      argocd_applicationset_generator:
+        description: The generator of the ArgoCD Applications
+        default: list
+        type: string
+      argocd_imagetag_field:
+        description: The name of the ArgoCD Application(Set) value for the image tag
+        required: true
+        default: imageTag
+        type: string
+
+      argocd_filter_value:
+        description: The value of 'argocd_filter_key' in the ArgoCD ApplicationSet generator value
+        required: true
+        type: string
+      argocd_filter_key:
+        description: The key to be filtered for with 'argocd_filter_value' in the ArgoCD ApplicationSet generator value
+        required: true
+        type: string
+        default: project
+      github_argocd_apps_repository:
+        description: The GitHub repository storing the ArgoCD ApplicationSets
+
+
+    secrets:
+      github_personal_access_token:
+        description: The GH_PAT to authorize against the ArgoCD Apps-of-Apps repository
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update ArgoCD Image
+        env:
+          ARGOCD_REPO_SUB_FOLDER: ${{inputs.apps_repo_sub_folder}}
+          DOCKER_IMAGE_TAG: ${{ inputs.docker_tag }}
+          APPS_REPO_FILE_NAME: ${{inputs.apps_repo_file_name}}
+          ARGOCD_APPLICATION_SET: ${{ inputs.argocd_applicationset }}
+          ARGOCD_APPLICATION_SET_GENERATOR: ${{ inputs.argocd_applicationset_generator }}
+          ARGOCD_IMAGETAG_FIELD: ${{ inputs.argocd_imagetag_field }}
+          ARGOCD_REPO: ${{ inputs.github_argocd_apps_repository }}
+          ARGOCD_REPO_EVENT: ${{ inputs.apps_repo_event }}
+
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          ARGOCD_APPLICATION_VALUE_FILTER: ${{ inputs.argocd_filter_value }}
+          ARGOCD_APPLICATION_VALUE_KEY: ${{ inputs.argocd_filter_key }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/$ARGOCD_REPO/dispatches \
+            -f "event_type=$ARGOCD_REPO_EVENT" \
+            -F "client_payload[project]=$ARGOCD_REPO_SUB_FOLDER" \
+            -F "client_payload[application]=$APPS_REPO_FILE_NAME" \
+            -F "client_payload[application-set]=$ARGOCD_APPLICATION_SET" \
+            -F "client_payload[generator-type]=$ARGOCD_APPLICATION_SET_GENERATOR" \
+            -F "client_payload[generator-filter]=$ARGOCD_APPLICATION_VALUE_KEY=$ARGOCD_APPLICATION_VALUE_FILTER" \
+            -F "client_payload[image-tag]=$DOCKER_IMAGE_TAG" \
+            -F "client_payload[image-tag-field]=$ARGOCD_IMAGETAG_FIELD" \
