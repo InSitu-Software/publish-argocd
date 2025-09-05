@@ -17,7 +17,6 @@ on:
         type: string
       apps_repo_event:
         description: GitHub Action Dispatch EventType to be triggered in ArgoCD Apps Repo
-        required: true
         default: update_app
         type: string
       argocd_applicationset:
@@ -30,7 +29,6 @@ on:
         type: string
       argocd_imagetag_field:
         description: The name of the ArgoCD Application(Set) value for the image tag
-        required: true
         default: imageTag
         type: string
 
@@ -40,7 +38,6 @@ on:
         type: string
       argocd_filter_key:
         description: The key to be filtered for with 'argocd_filter_value' in the ArgoCD ApplicationSet generator value
-        required: true
         type: string
         default: project
       github_argocd_apps_repository:
