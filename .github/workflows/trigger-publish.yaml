@@ -45,6 +45,8 @@ on:
         default: project
       github_argocd_apps_repository:
         description: The GitHub repository storing the ArgoCD ApplicationSets
+        type: string
+        required: true
 
 
     secrets:
