@@ -67,7 +67,7 @@ jobs:
           ARGOCD_REPO: ${{ inputs.github_argocd_apps_repository }}
           ARGOCD_REPO_EVENT: ${{ inputs.apps_repo_event }}
 
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.github_personal_access_token }}
           ARGOCD_APPLICATION_VALUE_FILTER: ${{ inputs.argocd_filter_value }}
           ARGOCD_APPLICATION_VALUE_KEY: ${{ inputs.argocd_filter_key }}
         run: |
